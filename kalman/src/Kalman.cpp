@@ -5,9 +5,14 @@
 #include "Kalman.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
+
 using namespace std;
 using namespace cv;
+
+clock_t start,over;
+double duration;
 int t0=0,t1=0,t2=0;
+
 boost::shared_ptr<pcl::visualization::PCLVisualizer>viewer (new pcl::visualization::PCLVisualizer ("line Viewer"));
 void Tracker::on_HoughLines(const Mat &a,vector<cv::Vec4i> &lines)
 {	
@@ -99,7 +104,8 @@ void Tracker::TransformCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,pcl::Poi
 
 void Tracker::processPointcloud(const sensor_msgs::PointCloud2 &scan/*pcl::PointCloud<pcl::PointXYZI>::Ptr temp_cloud*/)
 {	
-	//读取rosbag的消息，转化成pcl格式
+	start = clock();
+        //读取rosbag的消息，转化成pcl格式
 	pcl::PCLPointCloud2 pcl_pc;
 	pcl::PointCloud<pcl::PointXYZI>::Ptr points_raw(new pcl::PointCloud<pcl::PointXYZI>);
 	pcl::PointCloud<pcl::PointXYZI>::Ptr points_filtered(new pcl::PointCloud<pcl::PointXYZI>);
@@ -175,7 +181,8 @@ void Tracker::processPointcloud(const sensor_msgs::PointCloud2 &scan/*pcl::Point
 //	cout<<t2<<endl;
 	//合并两个点云
 	// *cloud=*cloud1+*cloud;
-
+    over = clock();
+    duration = (double) (over-start) / CLOCKS_PER_SEC;
 	sensor_msgs::PointCloud2 cloud_raw;
 	sensor_msgs::PointCloud2 cloud_out;
     pcl::toROSMsg(*points_raw, cloud_raw);
